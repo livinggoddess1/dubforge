@@ -1,0 +1,11 @@
+# Versions that every DubForge component agrees on. Install with:
+#   pip install -c constraints.txt <packages>
+# Chatterbox pins torch 2.6.0, and pyannote 3.x needs a torchaudio that still has AudioMetaData
+# (removed in later releases). Without this file pip may "helpfully" upgrade torch mid-install.
+torch==2.6.0
+torchaudio==2.6.0
+pyannote.audio>=3.1,<4
+# speechbrain 1.1+ requires torch>=2.7.1, which would pull torch off 2.6.0
+speechbrain>=1.0,<1.1
+# resemble-perth (Chatterbox watermark) imports pkg_resources, removed in setuptools 81
+setuptools<81

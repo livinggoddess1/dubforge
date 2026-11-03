@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dubforge"
+version = "0.1.0"
+description = "Expressive, modular Japanese→English dubbing pipeline (Apple Silicon friendly)"
+requires-python = ">=3.10"
+dependencies = ["numpy", "scipy", "soundfile", "pyyaml"]
+
+[project.optional-dependencies]
+analyze = ["librosa", "funasr"]
+# Install with: pip install -c constraints.txt -e ".[mac]"
+mac = ["torch==2.6.0", "torchaudio==2.6.0", "chatterbox-tts", "demucs", "mlx-whisper",
+       "pyannote.audio>=3.1,<4", "librosa", "funasr", "anthropic", "ocrmac", "pillow",
+       "fastapi>=0.110", "uvicorn>=0.29", "python-multipart>=0.0.9"]
+
+web = ["fastapi>=0.110", "uvicorn>=0.29", "python-multipart>=0.0.9"]
+
+[project.scripts]
+dubforge = "dubforge.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["dubforge*"]
+
+[tool.setuptools.package-data]
+"dubforge.web" = ["static/*"]

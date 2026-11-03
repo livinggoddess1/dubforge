@@ -1,0 +1,56 @@
+# Copy to config.yaml and edit. Anything you leave out uses the defaults in dubforge/config.py.
+
+device: auto                 # auto picks the M4 GPU (mps)
+work_root: ./dub_work
+output_dir: ./dubbed
+
+subtitles:
+  path: auto                 # auto = subtitle text in the video, else read burned-in subs | a .srt/.ass file | null
+  lang: en                   # official English subs become a meaning check for the adapter
+  segmentation: asr          # "subs" uses subtitle timing for line boundaries instead
+
+separate:
+  model: htdemucs_ft         # htdemucs is ~4x faster if you're iterating
+
+transcribe:
+  model: mlx-community/whisper-large-v3-turbo
+  initial_prompt: "炭治郎、禰豆子、善逸、伊之助"   # names help Whisper spell them
+
+diarize:
+  backend: pyannote          # needs HF_TOKEN; use "subs" if your .ass file has character names
+  # num_speakers: 6
+
+adapt:
+  backend: anthropic         # or: ollama (model: qwen3:14b) / mlx_lm (model: mlx-community/Qwen3-14B-4bit)
+  model: claude-sonnet-5-5
+  style: verbatim            # verbatim (subtitles word for word) | faithful (close to subtitles) | natural (free adaptation)
+  show_bible: ./show_bible.example.md
+  honorifics: keep
+
+tts:
+  backend: auto              # auto = IndexTTS if installed (emotion straight from the actor's audio), else chatterbox
+  reference: auto
+  register_shift: 0          # experimental: negative = deeper voices (hurt naturalness in testing)
+  keep_original_nonverbal: true
+  # voices:                  # swap a character to a different (consenting) voice
+  #   SPEAKER_03: ~/voices/my_friend_10s.wav
+  chatterbox:
+    cfg_weight: 0.0
+    exaggeration_range: 0.8
+  voice_match:               # make the English sound like the original actor's own voice
+    convert: false           # experimental: re-voice each line in the character's voice print
+    pitch: false             # experimental: match each line's pitch to the actor's (adds artifacts)
+    pitch_strength: 0.5      # 1.0 = match the actor's pitch exactly (more processed)
+    max_pitch_shift: 2.5
+  indextts2:
+    repo: ~/index-tts          # IndexTTS clone (bash scripts/install_indextts.sh); runs in its own environment
+    version: auto              # auto = 2.5 if installed (cross-language emotion transfer), else 2
+    emotion_source: audio    # audio | vector | text  (compare them — it's the core experiment)
+
+speakers:
+  names:                     # fill in after the first diarize run (dubforge show)
+    SPEAKER_00: Tanjiro
+    SPEAKER_01: Zenitsu
+
+fit:
+  mode: natural              # natural = start with the Japanese line, normal speaking speed | fit = squeeze to slot

@@ -1,0 +1,33 @@
+# DubForge settings for the cloud (Modal, Linux + Nvidia GPU). Used by deploy/modal_app.py.
+device: cuda
+work_root: /data/dub_work
+output_dir: /data/dubbed
+
+subtitles:
+  path: auto
+  lang: en
+  ocr:
+    engine: tesseract          # Apple's text recognition isn't available on Linux
+
+separate:
+  backend: auto                # RoFormer (installed in the cloud image), Demucs if it fails
+  model_dir: /cache/audio-separator
+
+transcribe:
+  backend: faster_whisper      # the Nvidia version of Whisper (mlx-whisper is Mac-only)
+  model: large-v3-turbo
+
+diarize:
+  backend: pyannote
+
+adapt:
+  backend: anthropic
+  model: claude-sonnet-5-5
+  style: verbatim
+
+tts:
+  backend: auto                # IndexTTS (built into the cloud image): emotion from the actor's audio
+  indextts2:
+    repo: /opt/index-tts
+    model_dir: /opt/index-tts/checkpoints_2
+    emotion_source: audio

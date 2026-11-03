@@ -1,0 +1,27 @@
+web_data/
+dub_work/
+dubbed/
+abtest/
+stutter_test*/
+config.yaml
+.venv/
+__pycache__/
+
+deploy/.share_key
+
+# secrets: the private-link keys and any local env file
+deploy/.share_key*
+.env
+*.env
+# local-only
+deploy/_backup_before_yc/
+*.egg-info/
+.pytest_cache/
+.DS_Store
+# media: never publish video, audio or cloned voices
+*.mp4
+*.mkv
+*.mov
+*.wav
+*.mp3
+*.m4a

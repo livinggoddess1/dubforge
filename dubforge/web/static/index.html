@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>DubForge</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="DubForge">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1d1c1a" media="(prefers-color-scheme: dark)">
+<link rel="apple-touch-icon" href="/static/icon-180.png">
+<link rel="icon" type="image/png" href="/static/icon-180.png">
+<link rel="manifest" id="manifest" href="/manifest.webmanifest" crossorigin="use-credentials">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand"><span class="logo">◐</span> DubForge</div>
+  <div id="chips" class="chips"></div>
+</header>
+
+<main class="layout">
+  <aside class="side">
+    <section class="card" id="new-card">
+      <h2>New dub</h2>
+      <div id="drop" class="drop" tabindex="0">
+        <input id="file" type="file" accept="video/*,.mkv,.mp4,.mov,.avi,.webm,.m4v,.ts" hidden>
+        <div class="drop-text"><strong>Drop a video here</strong><span>or click to choose one</span></div>
+        <div id="upload-progress" class="bar hidden"><div></div></div>
+      </div>
+      <div id="path-row" class="field hidden">
+        <label for="path">…or a video already on this Mac</label>
+        <input id="path" placeholder="/Users/you/Videos/episode.mkv" autocomplete="off">
+      </div>
+      <div id="chosen" class="chosen hidden"></div>
+
+      <div class="field inline">
+        <label><input type="checkbox" id="use-clip" checked> Only part of it</label>
+      </div>
+      <div class="grid2" id="clip-fields">
+        <div class="field"><label for="clip-start">Start (m:ss)</label><input id="clip-start" value="5:00"></div>
+        <div class="field"><label for="clip-len">Length (seconds)</label><input id="clip-len" type="number" min="5" value="120"></div>
+      </div>
+
+      <details class="more">
+        <summary>Options</summary>
+        <div class="field">
+          <label for="style">English script</label>
+          <select id="style">
+            <option value="">From config</option>
+            <option value="verbatim">Verbatim: the subtitles word for word</option>
+            <option value="faithful">Faithful: close to the subtitles, speakable</option>
+            <option value="natural">Natural: free English adaptation</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="tts">Voice</label>
+          <select id="tts">
+            <option value="auto">Best installed (IndexTTS → Chatterbox)</option>
+            <option value="indextts2">IndexTTS (emotion from the actor's audio)</option>
+            <option value="chatterbox">Chatterbox</option>
+            <option value="say">Mac system voice (quick timing check)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="subs">Subtitles</label>
+          <select id="subs">
+            <option value="">From config</option>
+            <option value="auto">Auto: from the file, else read burned-in ones</option>
+            <option value="embedded">Text track in the video</option>
+            <option value="ocr">Read burned-in subtitles</option>
+            <option value="file">Upload a subtitle file…</option>
+          </select>
+          <input id="subs-file" type="file" accept=".srt,.ass,.ssa,.vtt" class="hidden">
+        </div>
+        <div class="field">
+          <label for="audio-stream">Audio track (if the dub comes out in the wrong language)</label>
+          <select id="audio-stream">
+            <option value="">Automatic (the Japanese one)</option>
+            <option value="0">Track 1</option><option value="1">Track 2</option><option value="2">Track 3</option>
+          </select>
+        </div>
+      </details>
+      <button id="start" class="primary" disabled>Start dubbing</button>
+      <p id="start-msg" class="msg"></p>
+    </section>
+
+    <section class="card">
+      <h2>Dubs</h2>
+      <ul id="jobs" class="jobs"><li class="empty">Nothing yet.</li></ul>
+    </section>
+  </aside>
+
+  <section id="detail" class="detail">
+    <div class="placeholder">
+      <h1>Dub a scene</h1>
+      <p>Drop in an episode, pick the part you want, and press <em>Start dubbing</em>. Each step writes plain files you can edit, so you can fix a line and re-voice just that line.</p>
+      <ol>
+        <li>Separate voices from music and effects</li>
+        <li>Transcribe the Japanese and find who's speaking</li>
+        <li>Measure how each line is performed</li>
+        <li>Write the English, then perform it in each character's voice</li>
+        <li>Mix it back onto the original music and effects</li>
+      </ol>
+    </div>
+  </section>
+</main>
+
+<div id="toast" class="toast hidden"></div>
+<template id="detail-tpl">
+  <div class="detail-head">
+    <div>
+      <h1 class="title"></h1>
+      <div class="sub"></div>
+    </div>
+    <div class="actions"></div>
+  </div>
+  <div class="progress-wrap hidden">
+    <div class="bar big"><div></div></div>
+    <div class="stage-text"></div>
+  </div>
+  <div class="error hidden"></div>
+  <div class="player-wrap hidden">
+    <video class="player" controls playsinline preload="metadata"></video>
+    <div class="player-bar">
+      <div class="seg" role="group" aria-label="Audio">
+        <button data-lang="en" class="on">English dub</button><button data-lang="ja">Japanese</button>
+      </div>
+      <label class="subs-toggle"><input type="checkbox" checked> Subtitles</label>
+      <span class="spacer"></span>
+      <a class="dl mp4" download>Save video (.mp4)</a>
+      <a class="dl mkv" download>Download .mkv</a>
+      <a class="dl srt" download>Script .srt</a>
+    </div>
+  </div>
+  <div class="metrics hidden"></div>
+  <section class="script hidden">
+    <div class="script-head">
+      <h2>Script</h2>
+      <div class="filters">
+        <input class="search" placeholder="Search lines">
+        <select class="who"><option value="">Everyone</option></select>
+      </div>
+      <button class="primary revoice hidden">Re-voice edited lines</button>
+    </div>
+    <p class="hint">Edit any English line or delivery note; it's kept on later runs (🔒). Rate lines by ear: your ratings are the ground truth for improving DubForge.</p>
+    <div class="lines"></div>
+  </section>
+  <details class="log">
+    <summary>Log</summary>
+    <pre></pre>
+  </details>
+</template>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
